@@ -1,26 +1,19 @@
 # text_generation_gpt2.py
 
-# This script uses the GPT-2 language model to generate text given a prompt.
-# GPT-2 is a Transformer-based model trained to predict the next word in a sequence.
+# This script uses the GPT-2 language model to generate text from a given prompt
 
-from transformers import pipeline  # Hugging Face abstraction for running models
+from transformers import pipeline  # Import Hugging Face's pipeline tool for easy model access
 
-# Load the text-generation pipeline using GPT-2 as the default model
-# This wraps tokenization, model loading, and generation into a simple interface
+# Load the text-generation pipeline using GPT-2 (a Transformer-based language model)
 generator = pipeline("text-generation", model="gpt2")
 
-# Provide a text prompt that GPT-2 will continue from
+# Define the input prompt (starting point for text generation)
 prompt = "Artificial intelligence will revolutionize"
 
-# Generate up to 50 new tokens (words, subwords, punctuation) following the prompt
+# Generate a continuation of the prompt with a maximum length of 50 tokens
+# Only one sequence (result) is generated
 result = generator(prompt, max_length=50, num_return_sequences=1)
 
-# Print the generated text
+# Print the generated text to the console
 print("Generated Text:")
-print(result[0]['generated_text'])
-
-# Notes:
-# - GPT-2 is a generative pretrained transformer
-# - It was trained on a massive dataset to model natural language
-# - "max_length" sets the total number of tokens (prompt + generated)
-# - "num_return_sequences" lets you generate multiple variations
+print(result[0]['generated_text'])  # Access and display the generated sequence

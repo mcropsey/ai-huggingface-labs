@@ -1,17 +1,28 @@
-# train_custom_dataset.py
+"""
+What is the model learning to do?
 
-# This script demonstrates how to train a PyTorch model on a custom dataset using a DataLoader.
-# It includes dataset loading, model definition, training loop, and loss computation.
+It’s learning to map random 10-number inputs to a classification decision (label 0 or 1).
+
+
+“Given these 10 numbers, is this sample more like a class 0 or a class 1?”
+
+At first, the model is just guessing. But as it sees more data (through batches and epochs), it adjusts itself to make better predictions.
+
+
+"""
+# train_custom_dataset_verbose.py
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 
-# Sample custom dataset using PyTorch's Dataset class
+# -----------------------
+# Custom Dataset Creation
+# -----------------------
 class MyDataset(Dataset):
     def __init__(self):
-        # Toy dataset: 100 samples with 10 features each
+        print("Initializing custom dataset with 100 samples and 10 features each.")
         self.data = torch.randn(100, 10)  # Random input features
         self.labels = torch.randint(0, 2, (100,))  # Binary classification labels (0 or 1)
 
@@ -21,12 +32,15 @@ class MyDataset(Dataset):
     def __getitem__(self, idx):
         return self.data[idx], self.labels[idx]
 
-# Define a simple neural network with one hidden layer
+# -----------------------
+# Neural Network Definition
+# -----------------------
 class SimpleNN(nn.Module):
     def __init__(self):
         super(SimpleNN, self).__init__()
+        print("Building the neural network model...")
         self.fc1 = nn.Linear(10, 16)  # Input layer to hidden layer
-        self.relu = nn.ReLU()         # Non-linear activation function
+        self.relu = nn.ReLU()         # Activation
         self.fc2 = nn.Linear(16, 2)   # Hidden layer to output layer (2 classes)
 
     def forward(self, x):
@@ -35,29 +49,43 @@ class SimpleNN(nn.Module):
         x = self.fc2(x)
         return x
 
-# Instantiate dataset and wrap it in a DataLoader for batching
+# -----------------------
+# Setup
+# -----------------------
+print("Loading dataset and preparing data loader...")
 train_dataset = MyDataset()
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 
-# Initialize model, loss function, and optimizer
+print("Instantiating the model, loss function, and optimizer...")
 model = SimpleNN()
-criterion = nn.CrossEntropyLoss()  # For multi-class classification
+criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# Training loop
+# -----------------------
+# Training Loop
+# -----------------------
+print("\nStarting training...\n")
 for epoch in range(5):  # Train for 5 epochs
     total_loss = 0
-    for batch_data, batch_labels in train_loader:
-        optimizer.zero_grad()            # Clear previous gradients
-        outputs = model(batch_data)      # Forward pass
-        loss = criterion(outputs, batch_labels)  # Compute loss
-        loss.backward()                  # Backpropagation
-        optimizer.step()                 # Update weights
+    print(f"Epoch {epoch+1} started...")
+    
+    for i, (batch_data, batch_labels) in enumerate(train_loader):
+        print(f"  Batch {i+1}:")
+        print(f"    Input shape: {batch_data.shape}")
+        print(f"    Labels: {batch_labels.tolist()}")
+
+        optimizer.zero_grad()  # Reset gradients
+        outputs = model(batch_data)  # Forward pass
+        print(f"    Model outputs (logits): {outputs.detach().numpy()}")
+
+        loss = criterion(outputs, batch_labels)  # Loss calculation
+        print(f"    Loss for this batch: {loss.item():.4f}")
+        
+        loss.backward()  # Backpropagation
+        optimizer.step()  # Update weights
+
         total_loss += loss.item()
 
-    print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+    print(f"Epoch {epoch+1} complete. Total Loss: {total_loss:.4f}\n")
 
-# Summary:
-# - This demonstrates supervised learning with PyTorch
-# - Model learns to classify synthetic data into 2 categories
-# - `CrossEntropyLoss` + softmax is common for classification tasks
+print("Training finished!")
